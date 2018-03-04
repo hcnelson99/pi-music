@@ -43,7 +43,7 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
                         adcout |= 0x1
 
         GPIO.output(cspin, True)
-        
+
         adcout >>= 1       # first bit is 'null' so drop it
         return adcout
 
@@ -60,29 +60,36 @@ GPIO.setup(SPIMISO, GPIO.IN)
 GPIO.setup(SPICLK, GPIO.OUT)
 GPIO.setup(SPICS, GPIO.OUT)
 
-# 10k trim pot connected to adc #0
-potentiometer_adc = 0;
-
 sender = udp_client.SimpleUDPClient('127.0.0.1', 4559)
 
 time.sleep(2)
 
+def dist_to_pitch(d):
+    low = 0.002
+    high = 0.005
+    too_high = 0.007
+    if d > too_high:
+        return None
+    if d < low:
+        d = low
+    elif d > high:
+        d = high
+    pitch_coefficient = (d - low) / (high - low)
+    low_pitch = 60
+    high_pitch = 72
+    pitch = high_pitch - (high_pitch - low_pitch) * pitch_coefficient
+    return round(pitch)
+
 while True:
     time.sleep(0.1)
-    distance = readadc(potentiometer_adc, SPICLK, SPIMOSI, SPIMISO, SPICS)
-    print(distance)
-    low_distance = 0
-    high_distance = 1023
-    if distance < low_distance:
-        distance = low_distance
-    elif distance > high_distance:
-        distance = high_distance
-        continue
-    pitch_coefficient = (distance - low_distance) / (high_distance - low_distance)
-    low_pitch = 45
-    high_pitch = 80
-    pitch = high_pitch - (high_pitch - low_pitch) * pitch_coefficient
-    sender.send_message('/a', pitch) 
+    chs = []
+    for i in range(4):
+        chs.append(readadc(i, SPICLK, SPIMOSI, SPIMISO, SPICS))
+    print(chs)
+    if chs[1] > 10:
+        print("boom")
+
+    # sender.send_message('/a', pitch)
 
 
 
