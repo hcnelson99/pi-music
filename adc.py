@@ -80,14 +80,21 @@ def dist_to_pitch(d):
     pitch = high_pitch - (high_pitch - low_pitch) * pitch_coefficient
     return round(pitch)
 
+old_chs = [0, 0, 0, 0]
+samples = 0
+# st = time.time()
 while True:
-    time.sleep(0.1)
+    # time.sleep(0.01)
     chs = []
-    for i in range(4):
+    for i in range(1):
         chs.append(readadc(i, SPICLK, SPIMOSI, SPIMISO, SPICS))
-    print(chs)
-    if chs[1] > 10:
+    # print("sps:", samples / (time.time() - st))
+    # print(chs)
+    if chs[0] > 30 and old_chs[0] > 30:
         print("boom")
+        sender.send_message('/a', 50)
+    old_chs = chs
+    samples += 1
 
     # sender.send_message('/a', pitch)
 
