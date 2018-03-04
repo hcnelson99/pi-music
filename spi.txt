@@ -1,9 +1,10 @@
-live_loop :foo do
-  set_sched_ahead_time! 0.1
-end
+set_sched_ahead_time! 0
+
+n = play 50, attack: 0, delay: 0, release: 0, sustain: 15
 
 live_loop :foo do
-  a = sync "/osc/a"
-  use_synth :pluck
-  play a
+  a, b = sync "/osc/a"
+  control n, note: a
+  control n, amp: b
 end
+

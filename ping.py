@@ -23,6 +23,7 @@ class DistanceSensor:
     def ping(self):
         self.trig()
         echo_wait_init = time.time()
+        pulse_start = echo_wait_init
         while GPIO.input(self.ECHO)==0:
             pulse_start=time.time()
             if (pulse_start > echo_wait_init + 0.01):
@@ -59,12 +60,13 @@ def dist_to_pitch(d):
     return round(pitch)
 
 while True:
-    time.sleep(0.01)
+    time.sleep(0.1)
     d1 = dist.ping()
     d2 = dist2.ping()
-    print("d1:", d1, "\td2:", d2, "\tbut:", GPIO.input(but))
+    b = GPIO.input(but)
+    print("d1:", d1, "\td2:", d2, "\tbut:", b)
     d = (d1 + d2) / 2
     p = dist_to_pitch(d)
     print("p:", p)
     if p != None:
-        sender.send_message('/a', p)
+        sender.send_message('/a', (p, b))
