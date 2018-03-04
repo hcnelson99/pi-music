@@ -1,0 +1,9 @@
+live_loop :foo do
+  set_sched_ahead_time! 0.1
+end
+
+live_loop :foo do
+  a = sync "/osc/a"
+  use_synth :pluck
+  play a
+end
